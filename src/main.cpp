@@ -1,26 +1,12 @@
 /*
-The MIT License (MIT)
-
-Copyright (c) 2019 Ha Thach (tinyusb.org)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
- */
+--.--
+  |  ,---.,---.,-.-.,---.,---.
+  |  |    ,---|| | ||   |,---|
+  `  `    `---^` ' '|---'`---^
+                    |
+(C) 2023 Samantha-uk
+https://github.com/samantha-uk/trampa
+*/
 
 #include "FreeRTOS.h"
 #include "taskcpp.h"
@@ -34,7 +20,7 @@ THE SOFTWARE.
 #include <stdarg.h>
 #include <string.h>
 #include <task.h>
-#include "midibutton.h"
+#include "taskbutton.h"
 
 TaskHandle_t tMIDITask, tTUDTask;
 
@@ -42,7 +28,6 @@ TaskHandle_t tMIDITask, tTUDTask;
 void vTUDTask(void *ptr);
 void vMIDITask(void *ptr);
 void midi_task(void);
-int write_serial(const char *, ...) __attribute__((format(printf, 1, 0)));
 
 /*------------- MAIN -------------*/
 int main(void)
@@ -51,19 +36,11 @@ int main(void)
   board_init();
   tud_init(BOARD_TUD_RHPORT);
 
-  MIDI MIDIusb(0);
-
   // Create the buttons
-  MIDIButton button1(&MIDIusb, 1, 13, "Button1", MIDIBUTTON_STACK,
-                     TaskPrio_Mid);
-  MIDIButtonConfig config1 = {
-      true,                // DetectClicks
-      buttonMode::TOGGLE,  // button mode
-      1,                   // channel
-      0,                   // Low value
-      127,                 // High value
-  };
-  button1.setConfig(&config1);
+  TASKButton button1(1, 13, true, "Button1", TASKBUTTON_STACK, TaskPrio_Mid);
+  TASKButton button2(2, 12, true, "Button2", TASKBUTTON_STACK, TaskPrio_Mid);
+  TASKButton button3(3, 11, true, "Button3", TASKBUTTON_STACK, TaskPrio_Mid);
+  TASKButton button4(4, 10, true, "Button4", TASKBUTTON_STACK, TaskPrio_Mid);
 
   xTaskCreate(vTUDTask, "TUD", 2048, NULL, TaskPrio_High, &tTUDTask);
   xTaskCreate(vMIDITask, "MIDI", 2048, NULL, TaskPrio_Mid, &tMIDITask);

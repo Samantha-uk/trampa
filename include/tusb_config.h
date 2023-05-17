@@ -1,4 +1,13 @@
 /*
+--.--
+  |  ,---.,---.,-.-.,---.,---.
+  |  |    ,---|| | ||   |,---|
+  `  `    `---^` ' '|---'`---^
+                    |
+(C) 2023 Samantha-uk
+https://github.com/samantha-uk/trampa
+*/
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Ha Thach (tinyusb.org)

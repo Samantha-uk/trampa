@@ -8,8 +8,8 @@
 https://github.com/samantha-uk/trampa
 */
 
-#ifndef _MIDIBUTTON_H_
-#define _MIDIBUTTON_H_
+#ifndef _TASKBUTTON_H_
+#define _TASKBUTTON_H_
 
 #include "taskcpp.h"
 #include "button.h"
@@ -19,7 +19,8 @@ https://github.com/samantha-uk/trampa
 // Holds a set of configured MIDI messages, for all the possible button events
 // Holds any state associated with buttons that are latching or
 // increment/decrement
-#define MIDIBUTTON_STACK 1024
+#define TASKBUTTON_STACK 1024
+// TODO Move this enum to the eventProcessor
 enum class buttonMode {
   FIXED,      // Always use the lowValue as MIDI message value
   TOGGLE,     // Alternate between lowValue & highValue as MIDI message value
@@ -31,23 +32,12 @@ enum class buttonMode {
               // sent
 };
 
-struct MIDIButtonConfig {
-  bool detectClicks;
-  buttonMode mode;
-  int channel;
-  int lowValue;
-  int highValue;
-  MIDIMessage message[BUTTON_EVENT_COUNT];
-};
-
-class MIDIButton : public Thread<MIDIButton>, IButtonEventHandler {
+class TASKButton : public Thread<TASKButton>, IButtonActionHandler {
  public:
-  MIDIButton(MIDI *MIDIusb, int8_t id, uint8_t pin, const char *name,
+  TASKButton(int8_t id, uint8_t pin, bool detectClicks, const char *name,
              unsigned portSHORT _stackDepth, TaskPriority priority);
-  ~MIDIButton();
-  void setConfig(MIDIButtonConfig *config);
-  void start(const char *name);
-  void handleEvent(int id, ButtonEvent event, int clicks);
+  ~TASKButton();
+  void handleAction(int id, ButtonAction action, int clicks);
   void Main();
 
  private:
@@ -55,10 +45,8 @@ class MIDIButton : public Thread<MIDIButton>, IButtonEventHandler {
 
   int _id;        // button ID used in callback to identofy button instance
   uint _pin = 0;  // GPIO pin for the button
-  MIDI *_MIDIusb = NULL;
-  int _previousValue = -1;
+  bool _detectClicks = false;
   Button *_button = NULL;
-  MIDIButtonConfig *_config = NULL;
 };
 
-#endif /* _MIDIBUTTON_H_ */
+#endif /* _TASKBUTTON_H_ */

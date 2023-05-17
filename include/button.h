@@ -31,11 +31,12 @@ extern "C" {
 
 #include "pico/stdlib.h"
 #include <hardware/gpio.h>
+#include <ctype.h>
 
 #define INTEGRATOR_MAX 10
 
 enum class ButtonState { IDLE, PRESSED, RELEASED, HOLD };
-enum ButtonEvent {
+enum class ButtonAction {
   PRESS,
   RELEASE,
   CLICK,
@@ -45,9 +46,15 @@ enum ButtonEvent {
   BUTTON_EVENT_COUNT
 };
 
-class IButtonEventHandler {
+struct ButtonEvent {
+  int buttonID;
+  ButtonAction action;
+  int clicks;
+};
+
+class IButtonActionHandler {
  public:
-  virtual void handleEvent(int id, ButtonEvent event, int clicks) = 0;
+  virtual void handleAction(int id, ButtonAction action, int clicks) = 0;
 };
 
 class Button {
@@ -66,10 +73,10 @@ class Button {
 
   // Set the mode of the button
   void setClickDetection(bool clickDetect);
-  void setEventHandler(IButtonEventHandler *eventHandler);
+  void setEventHandler(IButtonActionHandler *eventHandler);
 
  private:
-  void fireEvent(ButtonEvent event);
+  void fireAction(ButtonAction action);
   void setState(ButtonState state);
   // All times in microseconds
   int64_t _clickDelay = 180000;  // Used to check if we should stop checking for
@@ -80,7 +87,7 @@ class Button {
       500000;  // USed to determine if it is time to send a REPEAT event
   bool _clickDetect =
       false;  // Should we check for clicks/hold or simply press/release
-  IButtonEventHandler *_eventHandler = NULL;
+  IButtonActionHandler *_eventHandler = NULL;
 
   int _id;        // button ID used in callback to identify button instance
   uint _pin = 0;  // GPIO pin for the button

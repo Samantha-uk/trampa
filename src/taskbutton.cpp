@@ -9,25 +9,25 @@ https://github.com/samantha-uk/trampa
 */
 
 #include <FreeRTOS.h>
-#include "midibutton.h"
+#include "taskbutton.h"
 
-MIDIButton::MIDIButton(MIDI *MIDIusb, int8_t id, uint8_t pin, const char *name,
-                       unsigned portSHORT stackDepth, TaskPriority priority)
+TASKButton::TASKButton(int8_t id, uint8_t pin, bool detectClicks,
+                       const char *name, unsigned portSHORT stackDepth,
+                       TaskPriority priority)
     : Thread{stackDepth, priority, name},
       _id(id),
       _pin(pin),
-      _MIDIusb(MIDIusb) {
+      _detectClicks(detectClicks) {
   gpio_init(_pin);
   gpio_set_dir(_pin, GPIO_IN);
   gpio_pull_up(_pin);
 }
 
-MIDIButton::~MIDIButton() {}
-void MIDIButton::setConfig(MIDIButtonConfig *config) { _config = config; }
+TASKButton::~TASKButton() { delete _button; }
 
-void MIDIButton::Main() {
+void TASKButton::Main() {
   _button = new Button(_id, _pin);
-  _button->setClickDetection(_config->detectClicks);
+  _button->setClickDetection(_detectClicks);
   _button->setEventHandler(this);
 
   TickType_t xPreviousWakeTime;
@@ -37,25 +37,24 @@ void MIDIButton::Main() {
   xPreviousWakeTime = xTaskGetTickCount();
   absolute_time_t start;
   do {
-    vTaskDelayUntil(&xPreviousWakeTime, pdMS_TO_TICKS(5));
+    xTaskDelayUntil(&xPreviousWakeTime, pdMS_TO_TICKS(5));
     start = get_absolute_time();
     _button->check();
     elapsed = absolute_time_diff_us(start, get_absolute_time());
-    // if (elapsed > 2) printf("Button Scan Time [%u]\r\n", elapsed);
   } while (true);
 }
 
-void MIDIButton::handleEvent(int id, ButtonEvent event, int clicks) {
-  switch (event) {
-    case ButtonEvent::PRESS:
+void TASKButton::handleAction(int id, ButtonAction action, int clicks) {
+  switch (action) {
+    case ButtonAction::PRESS:
       printf("Button[%u]- Press \r\n", id);
       // if latching then send alternate hi/low values
       break;
-    case ButtonEvent::RELEASE:
+    case ButtonAction::RELEASE:
       printf("Button[%u]- Release \r\n", id);
       // If latching do nothing
       break;
-    case ButtonEvent::CLICK:
+    case ButtonAction::CLICK:
       switch (clicks) {
         case 0:
           printf("Button[%u]- Click \r\n", id);
@@ -68,7 +67,7 @@ void MIDIButton::handleEvent(int id, ButtonEvent event, int clicks) {
           break;
       }
       break;
-    case ButtonEvent::HOLD:
+    case ButtonAction::HOLD:
       switch (clicks) {
         case 0:
           printf("Button[%u]- Hold \r\n", id);
@@ -78,7 +77,7 @@ void MIDIButton::handleEvent(int id, ButtonEvent event, int clicks) {
           break;
       }
       break;
-    case ButtonEvent::REPEAT:
+    case ButtonAction::REPEAT:
       switch (clicks) {
         case 0:
           printf("Button[%u]- Repeat \r\n", id);
@@ -88,7 +87,7 @@ void MIDIButton::handleEvent(int id, ButtonEvent event, int clicks) {
           break;
       }
       break;
-    case ButtonEvent::HOLD_RELEASE:
+    case ButtonAction::HOLD_RELEASE:
       switch (clicks) {
         case 0:
           printf("Button[%u]- Hold Release \r\n", id);
@@ -99,16 +98,4 @@ void MIDIButton::handleEvent(int id, ButtonEvent event, int clicks) {
       }
       break;
   }
-
-  // Send the corresponding message
-  /*   MIDIMessage *message = &(messageBank[id - 1][event]);
-    switch (message->msgType) {
-      case MIDIMsgType::CONTROL_CHANGE:
-        _MIDIusb->controlChange(message->lowValue, message->highValue,
-                                message->channel);
-        break;
-      case MIDIMsgType::PROGRAM_CHANGE:
-        _MIDIusb->programChange(message->lowValue, message->channel);
-        break;
-    } */
 }

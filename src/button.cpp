@@ -58,7 +58,7 @@ void Button::init(void) {
 }
 
 void Button::setClickDetection(bool clickDetect) { _clickDetect = clickDetect; }
-void Button::setEventHandler(IButtonEventHandler *eventHandler) {
+void Button::setEventHandler(IButtonActionHandler *eventHandler) {
   _eventHandler = eventHandler;
 }
 
@@ -87,10 +87,7 @@ bool Button::pressed() {
   }
   return _pressed;
 }
-void Button::setState(ButtonState state) {
-  printf("State button%d [%d]->[%d]\r\n", _id, _state, state);
-  _state = state;
-}
+void Button::setState(ButtonState state) { _state = state; }
 
 void Button::check(void) {
   // Get the debounced current debounced pressed state of the button
@@ -107,7 +104,7 @@ void Button::check(void) {
         _clickCount = 0;
 
         // should we send a PRESS event
-        if (!_clickDetect) fireEvent(ButtonEvent::PRESS);
+        if (!_clickDetect) fireAction(ButtonAction::PRESS);
 
         // Change to PRESSED state
         setState(ButtonState::PRESSED);
@@ -123,7 +120,7 @@ void Button::check(void) {
           // Change to RELEASED state
           setState(ButtonState::RELEASED);
         } else {  // We ARE NOT detecting clicks
-          fireEvent(ButtonEvent::RELEASE);
+          fireAction(ButtonAction::RELEASE);
           // Reset _clickCount
           _clickCount = 0;
 
@@ -136,7 +133,7 @@ void Button::check(void) {
         if (_clickDetect &&
             absolute_time_diff_us(_buttonPressedTime, get_absolute_time()) >=
                 _holdDelay) {
-          fireEvent(ButtonEvent::HOLD);
+          fireAction(ButtonAction::HOLD);
 
           // Capture the time
           _buttonRepeatTime = get_absolute_time();
@@ -163,7 +160,7 @@ void Button::check(void) {
         if (absolute_time_diff_us(_buttonReleasedTime, get_absolute_time()) >=
             _clickDelay) {
           // _clickDelay time has passed so we report the number of clicks
-          fireEvent(ButtonEvent::CLICK);
+          fireAction(ButtonAction::CLICK);
 
           // Reset _clickCount
           _clickCount = 0;
@@ -180,7 +177,7 @@ void Button::check(void) {
       // These are used as "shifts" to potentially alter the behaviour of
       // hold/repeat events.
       if (!isPressed) {  // The button is now released
-        fireEvent(ButtonEvent::HOLD_RELEASE);
+        fireAction(ButtonAction::HOLD_RELEASE);
 
         // Reset _clickCount
         _clickCount = 0;
@@ -191,7 +188,7 @@ void Button::check(void) {
         // If time down is longer than _repeatDelay
         if (absolute_time_diff_us(_buttonRepeatTime, get_absolute_time()) >=
             _repeatDelay) {
-          fireEvent(ButtonEvent::REPEAT);
+          fireAction(ButtonAction::REPEAT);
 
           // Reset _buttonHoldTime
           _buttonRepeatTime = get_absolute_time();
@@ -201,9 +198,9 @@ void Button::check(void) {
   }
 }
 
-void Button::fireEvent(ButtonEvent event) {
+void Button::fireAction(ButtonAction action) {
   // Check to make sure that we have an eventHandler
   if (_eventHandler) {
-    _eventHandler->handleEvent(_id, event, _clickCount);
+    _eventHandler->handleAction(_id, action, _clickCount);
   }
 }
