@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "knisterpeter.vscode-commitizen",
+    "oderwat.indent-rainbow",
+    "usernamehw.errorlens",
+    "ms-vscode.cpptools",
+    "ms-vscode.cpptools-themes",
+    "twxs.cmake",
+    "ms-vscode.cmake-tools",
+    "shd101wyy.markdown-preview-enhanced",
+    "aaron-bond.better-comments"
+  ]
+}

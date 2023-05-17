@@ -1,0 +1,80 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"cmake.statusbar.advanced": {
+			"debug": {
+				"visibility": "hidden"
+			},
+			"launch": {
+				"visibility": "hidden"
+			},
+			"build": {
+				"visibility": "default"
+			},
+			"buildTarget": {
+				"visibility": "hidden"
+			}
+		},
+		"cmake.configureEnvironment": {
+			"PICO_SDK_PATH": "~/pico/pico-sdk",
+			"FREERTOS_KERNEL_PATH": "~/pico/FreeRTOS-Kernel-SMP"
+		},
+		"cmake.environment": {
+			"PICO_SDK_PATH": "~/pico/pico-sdk",
+			"FREERTOS_KERNEL_PATH": "~/pico/FreeRTOS-Kernel-SMP"
+		},
+		"cmake.defaultVariants": {
+			"buildType": {
+				"default": "debug",
+				"description": "The build type.",
+				"choices": {
+					"debug": {
+						"short": "Debug",
+						"long": "Disable optimizations - include debug information.",
+						"buildType": "Debug"
+					},
+					"release": {
+						"short": "Release",
+						"long": "Optimize for speed - exclude debug information.",
+						"buildType": "Release"
+					},
+					"minsize": {
+						"short": "MinSizeRel",
+						"long": "Optimize for smallest binary size - exclude debug information.",
+						"buildType": "MinSizeRel"
+					},
+					"reldeb": {
+						"short": "RelWithDebInfo",
+						"long": "Optimize for speed - include debug information.",
+						"buildType": "RelWithDebInfo"
+					}
+				}
+			}
+		},
+		"editor.fontSize": 16,
+		"workbench.colorCustomizations": {
+			"activityBar.activeBackground": "#2f7c47",
+			"activityBar.background": "#2f7c47",
+			"activityBar.foreground": "#e7e7e7",
+			"activityBar.inactiveForeground": "#e7e7e799",
+			"activityBarBadge.background": "#422c74",
+			"activityBarBadge.foreground": "#e7e7e7",
+			"commandCenter.border": "#e7e7e799",
+			"sash.hoverBorder": "#2f7c47",
+			"statusBar.background": "#215732",
+			"statusBar.foreground": "#e7e7e7",
+			"statusBarItem.hoverBackground": "#2f7c47",
+			"statusBarItem.remoteBackground": "#215732",
+			"statusBarItem.remoteForeground": "#e7e7e7",
+			"titleBar.activeBackground": "#215732",
+			"titleBar.activeForeground": "#e7e7e7",
+			"titleBar.inactiveBackground": "#21573299",
+			"titleBar.inactiveForeground": "#e7e7e799"
+		},
+		"peacock.color": "#215732"
+	}
+}
