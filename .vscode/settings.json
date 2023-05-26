@@ -44,5 +44,5 @@
     "peacock.color": "#215732",
     "files.associations": {
         "*.tcc": "cpp"
-    },
+    }
 }

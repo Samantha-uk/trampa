@@ -18,7 +18,7 @@ add_executable(${PROJECT_NAME}
         src/usb_descriptors.cpp
         src/button.cpp
         src/taskbutton.cpp
-        src/events.cpp
+        src/eventmanager.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

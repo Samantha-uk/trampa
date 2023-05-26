@@ -25,10 +25,6 @@ repeat - The button is held down and sends repeats
 #ifndef _BUTTON_H_
 #define _BUTTON_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "pico/stdlib.h"
 #include <hardware/gpio.h>
 #include <ctype.h>
@@ -47,7 +43,7 @@ enum class ButtonAction {
 };
 
 struct ButtonEvent {
-  int buttonID;
+  int id;
   ButtonAction action;
   int clicks;
 };
@@ -105,7 +101,4 @@ class Button {
       _buttonRepeatTime;  // Used to determine if we should send a REPEAT event
 };
 
-#ifdef __cplusplus
-}
-#endif
 #endif /* _BUTTON_H_ */

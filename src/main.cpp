@@ -8,46 +8,56 @@
 https://github.com/samantha-uk/trampa
 */
 
-#include "FreeRTOS.h"
-#include "taskcpp.h"
-#include "tusb.h"
+#include <FreeRTOS.h>
+#include <task.h>
+
 #include <bsp/board.h>
 #include <ctype.h>
-#include <FreeRTOS.h>
-#include <pico/stdio.h>
-#include <pico/stdlib.h>
-#include <queue.h>
-#include <stdarg.h>
-#include <string.h>
-#include <task.h>
+
+#include "tusb.h"
+
+#include "eventmanager.h"
 #include "taskbutton.h"
+
+#define TASKBUTTON_STACK 2048
+#define EVENTMANAGER_STACK 2048
 
 TaskHandle_t tMIDITask, tTUDTask;
 
-/*----------- PROTOTYPES -----------*/
+//----------- PROTOTYPES -----------
 void vTUDTask(void *ptr);
 void vMIDITask(void *ptr);
 void midi_task(void);
 
-/*------------- MAIN -------------*/
+//------------- MAIN -------------
 int main(void)
 
 {
+  // Initalisation
   board_init();
   tud_init(BOARD_TUD_RHPORT);
 
-  // Create the buttons
-  TASKButton button1(1, 13, true, "Button1", TASKBUTTON_STACK, TaskPrio_Mid);
-  TASKButton button2(2, 12, true, "Button2", TASKBUTTON_STACK, TaskPrio_Mid);
-  TASKButton button3(3, 11, true, "Button3", TASKBUTTON_STACK, TaskPrio_Mid);
-  TASKButton button4(4, 10, true, "Button4", TASKBUTTON_STACK, TaskPrio_Mid);
+  // Create and initalise the EventManager
+  EventManager eventManager("EventManager", EVENTMANAGER_STACK, TaskPrio_Mid);
+  if (!eventManager.init()) {  // Terminate
+  }
 
+  // Create the buttons
+  TASKButton button1(1, 13, true, "Button1", TASKBUTTON_STACK, TaskPrio_Mid,
+                     &eventManager);
+  TASKButton button2(2, 12, false, "Button2", TASKBUTTON_STACK, TaskPrio_Mid,
+                     &eventManager);
+  TASKButton button3(3, 11, false, "Button3", TASKBUTTON_STACK, TaskPrio_Mid,
+                     &eventManager);
+  TASKButton button4(4, 10, false, "Button4", TASKBUTTON_STACK, TaskPrio_Mid,
+                     &eventManager);
+
+  // Create the TunyUSB task
   xTaskCreate(vTUDTask, "TUD", 2048, NULL, TaskPrio_High, &tTUDTask);
   xTaskCreate(vMIDITask, "MIDI", 2048, NULL, TaskPrio_Mid, &tMIDITask);
-  printf("Starting scheduler.\r\n");
-  vTaskStartScheduler();
 
-  vTUDTask(NULL);
+  // Start FreeRTOS processing all the tasks
+  vTaskStartScheduler();
   return 0;
 }
 
@@ -70,8 +80,6 @@ void vMIDITask(void *ptr) {
   do {
     xTaskDelayUntil(&xPreviousWakeTime, pdMS_TO_TICKS(1000));
     midi_task();
-    printf(".");
-
   } while (true);
 }
 
@@ -119,17 +127,6 @@ void midi_task(void) {
 
   // If we are at the end of the sequence, start over.
   if (note_pos >= sizeof(note_sequence)) note_pos = 0;
-}
-
-int write_serial(const char *fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  char message[256];
-  int ret_val = vsprintf(message, fmt, args);
-  va_end(args);
-  tud_cdc_write_str(message);
-  tud_cdc_write_flush();
-  return ret_val;
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t Task, char *pcTaskName) {

@@ -13,13 +13,11 @@ https://github.com/samantha-uk/trampa
 
 #include "taskcpp.h"
 #include "button.h"
-#include "midi.h"
 
 // Composite class to bind midi and a button
 // Holds a set of configured MIDI messages, for all the possible button events
 // Holds any state associated with buttons that are latching or
 // increment/decrement
-#define TASKBUTTON_STACK 1024
 // TODO Move this enum to the eventProcessor
 enum class buttonMode {
   FIXED,      // Always use the lowValue as MIDI message value
@@ -32,16 +30,29 @@ enum class buttonMode {
               // sent
 };
 
-class TASKButton : public Thread<TASKButton>, IButtonActionHandler {
+struct buttonEvent {
+  int id;
+  ButtonAction action;
+  int clickCount;
+};
+
+class IButtonEventManager {
+ public:
+  virtual void addEvent(int id, ButtonAction action, int clicks) = 0;
+};
+
+class TASKButton : public Thread<TASKButton>, public IButtonActionHandler {
  public:
   TASKButton(int8_t id, uint8_t pin, bool detectClicks, const char *name,
-             unsigned portSHORT _stackDepth, TaskPriority priority);
+             unsigned portSHORT _stackDepth, TaskPriority priority,
+             IButtonEventManager *eventManager);
   ~TASKButton();
   void handleAction(int id, ButtonAction action, int clicks);
   void Main();
 
  private:
-  TaskHandle_t button_taskhandle;
+  TaskHandle_t _button_taskhandle;
+  IButtonEventManager *_eventManager = NULL;
 
   int _id;        // button ID used in callback to identofy button instance
   uint _pin = 0;  // GPIO pin for the button
